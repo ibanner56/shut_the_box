@@ -63,7 +63,7 @@ public class PubDice extends Observable {
                 result += " -- ";
                 if ("0".equals(game.winner))
                     result += "Tie!";
-                if ("1".equals(game.winner))
+                else if ("1".equals(game.winner))
                     result += game.players[0] + " wins!";
                 else
                     result += game.players[1] + " wins!";
