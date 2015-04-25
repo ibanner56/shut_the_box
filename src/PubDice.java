@@ -35,11 +35,6 @@ public class PubDice extends Observable {
         scores = new String[2];
     }
 
-    public static String getPlayerName() {
-        return game.playerName;
-    }
-    public static String getOpponentName() { return game.opponent; }
-    public static String getPlayerNo() { return game.playerNo; }
     public static boolean[] getTiles() { return game.tiles; }
     public static int[] getDice() { return game.dice; }
     public static boolean getTurn() { return game.turn; }
@@ -72,14 +67,6 @@ public class PubDice extends Observable {
 
             return result;
         } else return "Waiting for partner";
-    }
-
-    /**
-     * Splits the server response and processes it.
-     * @param s - the message from the server
-     */
-    private static void processServerMessage(String s) {
-        processServerMessage(s.split(" "));
     }
 
     /**
@@ -163,6 +150,7 @@ public class PubDice extends Observable {
 
     public static void rollDice() {
         int dieTotal = game.dice[0] + game.dice[1];
+        System.out.println(dieTotal);
         if(game.roundScore != dieTotal) return;
 
         game.roundScore = 0;
@@ -197,7 +185,7 @@ public class PubDice extends Observable {
 
     public static void resetBoard() {
         Arrays.fill(game.tiles, true);
-        Arrays.fill(game.dice, 1);
+        Arrays.fill(game.dice, 0);
         game.roundScore = 0;
         game.setChanged();
         game.notifyObservers("tile dice");
