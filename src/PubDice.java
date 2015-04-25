@@ -1,0 +1,221 @@
+import java.net.Socket;
+import java.util.Arrays;
+import java.util.Observable;
+import java.io.*;
+
+/**
+ * The Shut the Box Model. Manages all the data and the server connection.
+ * Created by Isaac on 4/22/2015.
+ */
+public class PubDice extends Observable {
+
+    private static final PubDice game = new PubDice();
+
+    private String playerName;
+    private String opponent;
+    private String playerNo;
+    private boolean turn;
+    private boolean[] tiles;
+    private int[] dice;
+    private String[] players;
+    private String[] scores;
+    private String winner;
+
+    private Socket socket;
+    BufferedReader in;
+    BufferedWriter out;
+
+    private PubDice() {
+        tiles = new boolean[9];
+        Arrays.fill(tiles, true);
+        dice = new int[2];
+        players = new String[2];
+        scores = new String[2];
+    }
+
+    public static String getPlayerName() {
+        return game.playerName;
+    }
+    public static String getOpponentName() { return game.opponent; }
+    public static String getPlayerNo() { return game.playerNo; }
+    public static boolean[] getTiles() { return game.tiles; }
+    public static int[] getDice() { return game.dice; }
+    public static boolean getTurn() { return game.turn; }
+
+    /**
+     * Processes the current game state and builds the message string
+     * @return the message box string
+     */
+    public static String getPrintOut() {
+        if(game.opponent != null) {
+            String result = "";
+            result += game.players[0] + " ";
+            result += game.scores[0] + " -- ";
+            result += game.players[1] + " ";
+            result += game.scores[1];
+            if(game.winner != null) {
+                result += " -- ";
+                if ("0".equals(game.winner))
+                    result += "Tie!";
+                if ("1".equals(game.winner))
+                    result += game.players[0] + " wins!";
+                else
+                    result += game.players[1] + " wins!";
+            }
+
+            return result;
+        } else return "Waiting for partner";
+    }
+
+    /**
+     * Splits the server response and processes it.
+     * @param s - the message from the server
+     */
+    private static void processServerMessage(String s) {
+        processServerMessage(s.split(" "));
+    }
+
+    /**
+     * Takes in the tokenized message from the server and updates the model.
+     * @param mtokens - message from the server
+     */
+    private static void processServerMessage(String[] mtokens) {
+        game.setChanged();
+
+        if("joined".equals(mtokens[0])) {
+            game.playerNo = mtokens[3];
+            if("1".equals(game.playerNo)) {
+                game.opponent = mtokens[2];
+                game.players[0] = game.playerName;
+                game.players[1] = game.opponent;
+            } else {
+                game.opponent = mtokens[1];
+                game.players[0] = game.opponent;
+                game.players[1] = game.playerName;
+            }
+            game.notifyObservers("joined");
+
+        } else if ("turn".equals(mtokens[0])) {
+            if(mtokens[1].equals(game.playerNo)) {
+                game.turn = true;
+            } else {
+                game.turn = false;
+            }
+            game.notifyObservers("turn");
+
+        } else if ("tile".equals(mtokens[0])) {
+            if(!game.turn) {
+                int tile = Integer.parseInt(mtokens[1]) - 1;
+                boolean state = ("up".equals(mtokens[2]));
+                game.tiles[tile] = state;
+                game.notifyObservers("tile " + tile);
+            }
+
+        } else if ("dice".equals(mtokens[0])) {
+            game.dice[0] = Integer.parseInt(mtokens[1]);
+            game.dice[1] = Integer.parseInt(mtokens[2]);
+            game.notifyObservers("dice");
+
+        } else if ("score".equals(mtokens[0])) {
+            int player = Integer.parseInt(mtokens[1]);
+            game.scores[player] = mtokens[2];
+            game.turn = !game.turn;
+            game.notifyObservers("score");
+
+        } else if ("win".equals(mtokens[0])) {
+            game.winner = mtokens[1];
+            game.notifyObservers("winner");
+
+        } else if ("quit".equals(mtokens[0])) {
+            try {
+                game.out.close();
+                game.socket.close();
+                System.exit(0);
+            } catch ( IOException ex ) {
+                System.err.println(ex.toString());
+                System.exit(1);
+            }
+        }
+    }
+
+    public static void flipTile(int i) {
+        String up = game.tiles[i] ? "up" : "down";
+        try {
+            game.out.write("tile " + i + " " + up);
+            game.out.newLine();
+            game.out.flush();
+        } catch(IOException ex) {
+            System.err.println(ex.toString());
+            System.exit(1);
+        }
+    }
+
+    public static void rollDice() {
+        try {
+            game.out.write("roll");
+            game.out.newLine();
+            game.out.flush();
+        } catch(IOException ex) {
+            System.err.println(ex.toString());
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Sends the appropriate quit message to the server.
+     */
+    public static void quit() {
+        try {
+            game.out.write("quit");
+            game.out.newLine();
+            game.out.flush();
+        } catch (IOException ex) {
+            System.err.println(ex.toString());
+            System.exit(1);
+        }
+    }
+
+
+    public static void main(String[] args) {
+        if(args.length != 3) {
+            System.err.println("Usage: java PubDice <host> <port> <playername>");
+            return;
+        }
+
+        game.playerName = args[2];
+
+        try {
+            String host = args[0];
+            int port = Integer.parseInt(args[1]);
+
+            game.socket = new Socket(host, port);
+            game.in = new BufferedReader(new InputStreamReader(game.socket.getInputStream()));
+            game.out = new BufferedWriter(new OutputStreamWriter(game.socket.getOutputStream()));
+
+        } catch (Exception e) {
+            System.err.println("Unable to connect to host " + args[0] + " on port "
+                    + args[1] + ":\n" + e.toString());
+        }
+
+        game.addObserver(new PubDiceController());
+
+        try {
+            game.out.write("join butts");
+            game.out.newLine();
+            game.out.flush();
+
+            while (true) {
+                while(!game.in.ready());
+                String s = game.in.readLine();
+                System.out.println(s);
+
+                // Spin off the processing into a new thread.
+                final String[] mtokens = s.split(" ");
+                processServerMessage(mtokens);
+            }
+        } catch (IOException ex) {
+            System.err.println(ex.toString());
+            System.exit(1);
+        }
+    }
+}
