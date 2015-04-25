@@ -139,7 +139,7 @@ public class PubDice extends Observable {
     }
 
     public static void flipTile(int i) {
-        String up = game.tiles[i] ? "up" : "down";
+        String up = !game.tiles[i] ? "up" : "down";
         try {
             game.out.write("tile " + i + " " + up);
             game.out.newLine();
