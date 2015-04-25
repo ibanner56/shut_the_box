@@ -114,6 +114,8 @@ public class PubDice extends Observable {
             game.notifyObservers("tile");
 
         } else if ("dice".equals(mtokens[0])) {
+            if(game.newGameTrigger)
+                resetGame();
             game.dice[0] = Integer.parseInt(mtokens[1]);
             game.dice[1] = Integer.parseInt(mtokens[2]);
             game.notifyObservers("dice");
@@ -155,7 +157,6 @@ public class PubDice extends Observable {
 
     public static void rollDice() {
         if(game.newGameTrigger) {
-            game.newGameTrigger = false;
             resetGame();
         }
         try {
@@ -193,6 +194,7 @@ public class PubDice extends Observable {
         game.winner = null;
         game.setChanged();
         game.notifyObservers("score");
+        game.newGameTrigger = false;
     }
 
     /**
