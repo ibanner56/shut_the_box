@@ -17,6 +17,7 @@ public class PubDice extends Observable {
     private boolean turn;
     private boolean[] tiles;
     private int[] dice;
+    private boolean rolled;
     private String[] players;
     private String[] scores;
     private int roundScore;
@@ -149,15 +150,16 @@ public class PubDice extends Observable {
     }
 
     public static void rollDice() {
-        int dieTotal = game.dice[0] + game.dice[1];
-        System.out.println(dieTotal);
-        if(game.roundScore != dieTotal) return;
-
-        game.roundScore = 0;
-
         if(game.newGameTrigger) {
             resetGame();
         }
+
+        int dieTotal = game.dice[0] + game.dice[1];
+        if(game.roundScore != dieTotal && game.rolled) return;
+
+        game.roundScore = 0;
+        game.rolled = true;
+
         try {
             game.out.write("roll");
             game.out.newLine();
@@ -170,7 +172,7 @@ public class PubDice extends Observable {
 
     public static void passTurn() {
         int dieTotal = game.dice[0] + game.dice[1];
-        if(game.roundScore != dieTotal) return;
+        if(game.roundScore != dieTotal && game.rolled) return;
 
         try {
             resetBoard();
@@ -185,8 +187,9 @@ public class PubDice extends Observable {
 
     public static void resetBoard() {
         Arrays.fill(game.tiles, true);
-        Arrays.fill(game.dice, 0);
+        Arrays.fill(game.dice, 1);
         game.roundScore = 0;
+        game.rolled = false;
         game.setChanged();
         game.notifyObservers("tile dice");
     }
