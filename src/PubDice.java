@@ -234,7 +234,7 @@ public class PubDice extends Observable {
         game.addObserver(new PubDiceController());
 
         try {
-            game.out.write("join butts");
+            game.out.write("join " + game.playerName);
             game.out.newLine();
             game.out.flush();
 
