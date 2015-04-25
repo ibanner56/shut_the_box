@@ -26,7 +26,7 @@ public class PubDice extends Observable {
     BufferedWriter out;
 
     private PubDice() {
-        tiles = new boolean[9];
+        tiles = new boolean[10];
         Arrays.fill(tiles, true);
         dice = new int[2];
         players = new String[2];
@@ -100,7 +100,7 @@ public class PubDice extends Observable {
             game.notifyObservers("turn");
 
         } else if ("tile".equals(mtokens[0])) {
-            int tile = Integer.parseInt(mtokens[1]) - 1;
+            int tile = Integer.parseInt(mtokens[1]);
             boolean state = "up".equals(mtokens[2]);
             game.tiles[tile] = state;
             game.notifyObservers("tile " + tile);
