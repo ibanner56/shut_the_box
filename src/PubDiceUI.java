@@ -354,6 +354,12 @@ public class PubDiceUI extends JFrame
         c.gridx = 2; c.gridy = 1;
         lm.setConstraints (doneButton, c);
         add (doneButton);
+        doneButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ctrl.passTurn();
+            }
+        });
 
         // Set up message area.
         messageArea = new JTextField (40);

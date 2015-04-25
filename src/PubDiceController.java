@@ -34,25 +34,34 @@ public class PubDiceController implements Observer{
         PubDice.rollDice();
     }
 
+    public void passTurn() {
+        PubDice.passTurn();
+    }
+
     @Override
     public void update(Observable o, Object arg) {
         if(arg instanceof String) {
             String change = (String) arg;
             if("joined".equals(change)) {
                 pdui.setMessage(PubDice.getPrintOut());
-            } else if("turn".equals(change)) {
+            }
+            if("turn".equals(change)) {
                 pdui.enableButtons(PubDice.getTurn());
-            } else if("tile".equals(change.substring(0, 4))) {
-                int tile = Integer.parseInt(change.split(" ")[1]);
-                pdui.setTile(tile, PubDice.getTiles()[tile]);
-            } else if("dice".equals(change)) {
+            }
+            if("tile".equals(change) || "board".equals(change)) {
+                for(int tile = 1; tile < PubDice.getTiles().length; tile++)
+                    pdui.setTile(tile, PubDice.getTiles()[tile]);
+            }
+            if("dice".equals(change) || "board".equals(change)) {
                 int[] dice = PubDice.getDice();
                 pdui.setDie(0, dice[0]);
                 pdui.setDie(1, dice[1]);
-            } else if("score".equals(change)) {
+            }
+            if("score".equals(change)) {
                 pdui.setMessage(PubDice.getPrintOut());
                 pdui.enableButtons(PubDice.getTurn());
-            } else if("win".equals(change)) {
+            }
+            if("win".equals(change)) {
                 pdui.setMessage(PubDice.getPrintOut());
             }
         }
