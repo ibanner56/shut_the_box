@@ -96,20 +96,14 @@ public class PubDice extends Observable {
             game.notifyObservers("joined");
 
         } else if ("turn".equals(mtokens[0])) {
-            if(mtokens[1].equals(game.playerNo)) {
-                game.turn = true;
-            } else {
-                game.turn = false;
-            }
+            game.turn = mtokens[1].equals(game.playerNo);
             game.notifyObservers("turn");
 
         } else if ("tile".equals(mtokens[0])) {
-            if(!game.turn) {
-                int tile = Integer.parseInt(mtokens[1]) - 1;
-                boolean state = ("up".equals(mtokens[2]));
-                game.tiles[tile] = state;
-                game.notifyObservers("tile " + tile);
-            }
+            int tile = Integer.parseInt(mtokens[1]) - 1;
+            boolean state = "up".equals(mtokens[2]);
+            game.tiles[tile] = state;
+            game.notifyObservers("tile " + tile);
 
         } else if ("dice".equals(mtokens[0])) {
             game.dice[0] = Integer.parseInt(mtokens[1]);

@@ -36,11 +36,8 @@ public class PubDiceController implements Observer{
 
     @Override
     public void update(Observable o, Object arg) {
-        System.out.println(arg);
         if(arg instanceof String) {
             String change = (String) arg;
-            System.out.println(change);
-
             if("joined".equals(change)) {
                 pdui.setMessage(PubDice.getPrintOut());
             } else if("turn".equals(change)) {
