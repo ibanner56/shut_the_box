@@ -102,8 +102,10 @@ public class PubDice extends Observable {
             game.notifyObservers("joined");
 
         } else if ("turn".equals(mtokens[0])) {
+            Arrays.fill(game.tiles, true);
+            Arrays.fill(game.dice, 1);
             game.turn = mtokens[1].equals(game.playerNo);
-            game.notifyObservers("turn");
+            game.notifyObservers("turn tile dice");
 
         } else if ("tile".equals(mtokens[0])) {
             int tile = Integer.parseInt(mtokens[1]);
@@ -182,13 +184,15 @@ public class PubDice extends Observable {
         Arrays.fill(game.tiles, true);
         Arrays.fill(game.dice, 1);
         game.setChanged();
-        game.notifyObservers("board");
+        game.notifyObservers("tile dice");
     }
 
     public static void resetGame() {
         resetBoard();
         game.scores = new String[2];
         game.winner = null;
+        game.setChanged();
+        game.notifyObservers("score");
     }
 
     /**

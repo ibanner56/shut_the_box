@@ -42,26 +42,26 @@ public class PubDiceController implements Observer{
     public void update(Observable o, Object arg) {
         if(arg instanceof String) {
             String change = (String) arg;
-            if("joined".equals(change)) {
+            if(change.contains("joined")) {
                 pdui.setMessage(PubDice.getPrintOut());
             }
-            if("turn".equals(change)) {
+            if(change.contains("turn")) {
                 pdui.enableButtons(PubDice.getTurn());
             }
-            if("tile".equals(change) || "board".equals(change)) {
+            if(change.contains("tile")) {
                 for(int tile = 1; tile < PubDice.getTiles().length; tile++)
                     pdui.setTile(tile, PubDice.getTiles()[tile]);
             }
-            if("dice".equals(change) || "board".equals(change)) {
+            if(change.contains("dice")) {
                 int[] dice = PubDice.getDice();
                 pdui.setDie(0, dice[0]);
                 pdui.setDie(1, dice[1]);
             }
-            if("score".equals(change)) {
+            if(change.contains("score")) {
                 pdui.setMessage(PubDice.getPrintOut());
                 pdui.enableButtons(PubDice.getTurn());
             }
-            if("win".equals(change)) {
+            if(change.contains("win")) {
                 pdui.setMessage(PubDice.getPrintOut());
             }
         }
