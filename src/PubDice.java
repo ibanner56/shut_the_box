@@ -50,14 +50,14 @@ public class PubDice extends Observable {
     public static String getPrintOut() {
         if(game.opponent != null) {
             String result = "";
-            result += game.players[0] + " ";
+            result += game.players[0];
             if(game.scores[0] != null)
-                result += game.scores[0];
+                result += " " + game.scores[0];
 
             result += " -- ";
-            result += game.players[1] + " ";
+            result += game.players[1];
             if(game.scores[1] != null)
-                result += game.scores[1];
+                result += " " + game.scores[1];
 
             if(game.winner != null) {
                 result += " -- ";
@@ -117,7 +117,7 @@ public class PubDice extends Observable {
             game.notifyObservers("dice");
 
         } else if ("score".equals(mtokens[0])) {
-            int player = Integer.parseInt(mtokens[1]);
+            int player = Integer.parseInt(mtokens[1]) - 1;
             game.scores[player] = mtokens[2];
             game.turn = !game.turn;
             game.notifyObservers("score");
