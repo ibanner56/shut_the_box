@@ -172,7 +172,8 @@ public class PubDice extends Observable {
 
     public static void passTurn() {
         int dieTotal = game.dice[0] + game.dice[1];
-        if(game.roundScore != dieTotal && game.rolled) return;
+        if(game.roundScore != dieTotal && game.rolled
+                && game.roundScore != 0) return;
 
         try {
             resetBoard();
