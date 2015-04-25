@@ -50,9 +50,14 @@ public class PubDice extends Observable {
         if(game.opponent != null) {
             String result = "";
             result += game.players[0] + " ";
-            result += game.scores[0] + " -- ";
+            if(game.scores[0] != null)
+                result += game.scores[0];
+
+            result += " -- ";
             result += game.players[1] + " ";
-            result += game.scores[1];
+            if(game.scores[1] != null)
+                result += game.scores[1];
+
             if(game.winner != null) {
                 result += " -- ";
                 if ("0".equals(game.winner))
