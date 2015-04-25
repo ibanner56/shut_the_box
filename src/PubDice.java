@@ -114,8 +114,10 @@ public class PubDice extends Observable {
             game.notifyObservers("tile");
 
         } else if ("dice".equals(mtokens[0])) {
-            if(game.newGameTrigger)
+            if(game.newGameTrigger) {
                 resetGame();
+                game.setChanged();
+            }
             game.dice[0] = Integer.parseInt(mtokens[1]);
             game.dice[1] = Integer.parseInt(mtokens[2]);
             game.notifyObservers("dice");
