@@ -9,26 +9,33 @@ import java.io.*;
  */
 public class PubDice extends Observable {
 
-    private static final PubDice game = new PubDice();
+    private static final PubDice game = new PubDice();  // Let's use singleton.
 
-    private String playerName;
-    private String opponent;
-    private String playerNo;
-    private boolean turn;
-    private boolean[] tiles;
-    private int tileSum;
-    private int[] dice;
-    private boolean rolled;
-    private String[] players;
-    private String[] scores;
-    private int roundScore;
-    private String winner;
-    private boolean newGameTrigger;
+    // Game state vars
+    private String playerName;      // Name of the player assoc. with this client.
+    private String opponent;        // Name of the enemy.
+    private String playerNo;        // Player 1 or Player 2
+    private boolean turn;           // Is it my turn?
+    private boolean[] tiles;        // Live state of the tiles.
+    private boolean[] lockedTiles;  // Tiles that have been locked in.
+    private int tileSum;            // Sum of the visible tiles.
+    private int[] dice;             // The two current dice values.
+    private boolean rolled;         // Have the dice been rolled this round?
+    private String[] players;       // Player names, in order.
+    private String[] scores;        // Player scores, in order.
+    private int roundScore;         // The current round (not turn) score
+    private String winner;          // Winner winner.
+    private boolean newGameTrigger; // Will rolling the dice be a new game?
 
-    private Socket socket;
-    BufferedReader in;
-    BufferedWriter out;
+    // Connection vars
+    private Socket socket;          // Socket to the server
+    BufferedReader in;              // Input buffer from server
+    BufferedWriter out;             // Output buffer to server
 
+    /**
+     * Makes an instance of PubDice.
+     * Since we're using singleton, this is private.
+     */
     private PubDice() {
         tiles = new boolean[10];
         Arrays.fill(tiles, true);
@@ -38,8 +45,19 @@ public class PubDice extends Observable {
         tileSum = 45;
     }
 
+    /**
+     * @return the current tile state.
+     */
     public static boolean[] getTiles() { return game.tiles; }
+
+    /**
+     * @return the current dice state.
+     */
     public static int[] getDice() { return game.dice; }
+
+    /**
+     * @return if it's this client's turn.
+     */
     public static boolean getTurn() { return game.turn; }
 
     /**
@@ -136,7 +154,14 @@ public class PubDice extends Observable {
         }
     }
 
+    /**
+     * Goes through the necessary steps to flip the tile.
+     * If tile i is already locked in, this is effectively a no-op.
+     * @param i - the number of the tile to flip.
+     */
     public static void flipTile(int i) {
+        if(game.lockedTiles[i]) return;
+
         String up = !game.tiles[i] ? "up" : "down";
 
         game.roundScore += (game.tiles[i] ? 1 : -1) * i;
@@ -151,12 +176,19 @@ public class PubDice extends Observable {
         }
     }
 
+    /**
+     * Rolls the dice. Locks in the currently flipped tiles.
+     * Is effectively a no-op if this isn't a legal action.
+     */
     public static void rollDice() {
         if(game.newGameTrigger) {
             resetGame();
         }
-
         if(!legalMove()) return;
+
+        for(int i = 0; i < game.tiles.length; i++) {
+            game.lockedTiles[i] = !game.tiles[i];
+        }
 
         game.tileSum -= game.roundScore;
         game.roundScore = 0;
@@ -172,8 +204,11 @@ public class PubDice extends Observable {
         }
     }
 
+    /**
+     * Passes the turn and resets the board.
+     * Is effectively a no-op if this isn't a legal action.
+     */
     public static void passTurn() {
-        int dieTotal = game.dice[0] + game.dice[1];
         if(!legalMove() && game.roundScore != 0) return;
 
         try {
@@ -187,8 +222,12 @@ public class PubDice extends Observable {
         }
     }
 
+    /**
+     * Resets the board to a clean play state.
+     */
     public static void resetBoard() {
         Arrays.fill(game.tiles, true);
+        Arrays.fill(game.lockedTiles, false);
         Arrays.fill(game.dice, 1);
         game.roundScore = 0;
         game.tileSum = 45;
@@ -197,6 +236,9 @@ public class PubDice extends Observable {
         game.notifyObservers("tile dice");
     }
 
+    /**
+     * Resets the game to the very beginning.
+     */
     public static void resetGame() {
         resetBoard();
         game.scores = new String[2];
@@ -206,6 +248,9 @@ public class PubDice extends Observable {
         game.newGameTrigger = false;
     }
 
+    /**
+     * @return whether a die roll or a turn pass is currently a legal action.
+     */
     public static boolean legalMove() {
         if(game.tileSum > 6) {
             int dieTotal = game.dice[0] + game.dice[1];
@@ -214,6 +259,15 @@ public class PubDice extends Observable {
             return game.roundScore == game.dice[0]
                     || game.roundScore == game.dice[1];
         }
+    }
+
+    /**
+     * If I have time this will check if any legal moves exist
+     * @return whether or not there are any other legal moves.
+     */
+    public static boolean allDone() {
+        // TODO: Something. Anything.
+        return false;
     }
 
     /**
@@ -231,6 +285,10 @@ public class PubDice extends Observable {
     }
 
 
+    /**
+     * Connects to the server, starts the game, and listens for messages from the server.
+     * @param args - the host, port, and player name - in that order.
+     */
     public static void main(String[] args) {
         if(args.length != 3) {
             System.err.println("Usage: java PubDice <host> <port> <playername>");
