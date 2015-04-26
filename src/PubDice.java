@@ -39,6 +39,7 @@ public class PubDice extends Observable {
     private PubDice() {
         tiles = new boolean[10];
         Arrays.fill(tiles, true);
+        lockedTiles = new boolean[10];
         dice = new int[2];
         players = new String[2];
         scores = new String[2];
