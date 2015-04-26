@@ -5,11 +5,15 @@ import java.util.Observer;
 
 /**
  * Controller for Shut the Box. Deals with communication between model and view.
- * Created by Isaac on 4/22/2015.
+ * @author  Isaac Banner
+ * @version 4/25/2015
  */
 public class PubDiceController implements Observer{
     private PubDiceUI pdui;
 
+    /**
+     * Makes and preps a PubDiceUI
+     */
     public PubDiceController () {
         pdui = new PubDiceUI(this);
 
@@ -26,14 +30,24 @@ public class PubDiceController implements Observer{
         });
     }
 
+    /**
+     * Tells the model to flip a tile.
+     * @param i - the tile to flip.
+     */
     public void tileClick(int i) {
         PubDice.flipTile(i);
     }
 
+    /**
+     * Tells the model to roll some dice.
+     */
     public void dieClick() {
         PubDice.rollDice();
     }
 
+    /**
+     * Tells the model to pass the turn.
+     */
     public void passTurn() {
         PubDice.passTurn();
     }

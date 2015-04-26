@@ -5,7 +5,8 @@ import java.io.*;
 
 /**
  * The Shut the Box Model. Manages all the data and the server connection.
- * Created by Isaac on 4/22/2015.
+ * @author  Isaac Banner
+ * @version 4/25/2015
  */
 public class PubDice extends Observable {
 

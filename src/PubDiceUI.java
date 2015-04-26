@@ -12,7 +12,8 @@ import javax.swing.JTextField;
  * Dice network game.
  *
  * @author  Alan Kaminsky
- * @version 14-Oct-2013
+ * @author  Isaac Banner
+ * @version 4/25/2015
  */
 public class PubDiceUI extends JFrame
 {
@@ -301,7 +302,6 @@ public class PubDiceUI extends JFrame
     private JButton[] dieButton = new JButton [2];
     private JButton doneButton;
     private JTextField messageArea;
-    private final PubDiceController ctrl;
 
     /**
      * Construct a new Pub Dice UI.
@@ -309,8 +309,6 @@ public class PubDiceUI extends JFrame
     public PubDiceUI(final PubDiceController ctrl)
     {
         super ("Pub Dice");
-
-        this.ctrl = ctrl;
 
         // Set up layout manager.
         GridBagLayout lm = new GridBagLayout();
