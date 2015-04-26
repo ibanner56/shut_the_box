@@ -297,19 +297,27 @@ public class PubDice extends Observable {
             return;
         }
 
-        game.playerName = args[2];
+        String host;
+        int port;
 
         try {
-            String host = args[0];
-            int port = Integer.parseInt(args[1]);
+            game.playerName = args[2];
+            host = args[0];
+            port = Integer.parseInt(args[1]);
+        } catch(NumberFormatException ex) {
+            System.err.println("Usage: java PubDice <host> <port> <playername>");
+            return;
+        }
 
+        try {
             game.socket = new Socket(host, port);
             game.in = new BufferedReader(new InputStreamReader(game.socket.getInputStream()));
             game.out = new BufferedWriter(new OutputStreamWriter(game.socket.getOutputStream()));
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.err.println("Unable to connect to host " + args[0] + " on port "
                     + args[1] + ":\n" + e.toString());
+            return;
         }
 
         game.addObserver(new PubDiceController());
@@ -322,7 +330,6 @@ public class PubDice extends Observable {
             while (true) {
                 while(!game.in.ready());
                 String s = game.in.readLine();
-                System.out.println(s);
 
                 // Spin off the processing into a new thread.
                 final String[] mtokens = s.split(" ");
