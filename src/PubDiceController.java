@@ -66,21 +66,4 @@ public class PubDiceController implements Observer{
             }
         }
     }
-
-    // TODO:
-    // Turn progression:
-    // All Tiles Up
-    // Let them press dice.
-    // Roll dice
-    // loop:
-    // Let them flip tiles.
-    // On Die press:
-    //   check if legal tile choices:
-    //   if not legal - alert them, don't submit.
-    //   if legal
-    //     send tile choices
-    //     roll dice
-    //     check for legal moves (maybe)
-    //     if no legal moves, goto end
-    //     else goto loop
 }

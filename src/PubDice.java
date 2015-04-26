@@ -16,6 +16,7 @@ public class PubDice extends Observable {
     private String playerNo;
     private boolean turn;
     private boolean[] tiles;
+    private int tileSum;
     private int[] dice;
     private boolean rolled;
     private String[] players;
@@ -34,6 +35,7 @@ public class PubDice extends Observable {
         dice = new int[2];
         players = new String[2];
         scores = new String[2];
+        tileSum = 45;
     }
 
     public static boolean[] getTiles() { return game.tiles; }
@@ -154,9 +156,9 @@ public class PubDice extends Observable {
             resetGame();
         }
 
-        int dieTotal = game.dice[0] + game.dice[1];
-        if(game.roundScore != dieTotal && game.rolled) return;
+        if(!legalMove()) return;
 
+        game.tileSum -= game.roundScore;
         game.roundScore = 0;
         game.rolled = true;
 
@@ -172,8 +174,7 @@ public class PubDice extends Observable {
 
     public static void passTurn() {
         int dieTotal = game.dice[0] + game.dice[1];
-        if(game.roundScore != dieTotal && game.rolled
-                && game.roundScore != 0) return;
+        if(!legalMove() && game.roundScore != 0) return;
 
         try {
             resetBoard();
@@ -190,6 +191,7 @@ public class PubDice extends Observable {
         Arrays.fill(game.tiles, true);
         Arrays.fill(game.dice, 1);
         game.roundScore = 0;
+        game.tileSum = 45;
         game.rolled = false;
         game.setChanged();
         game.notifyObservers("tile dice");
@@ -202,6 +204,16 @@ public class PubDice extends Observable {
         game.setChanged();
         game.notifyObservers("score");
         game.newGameTrigger = false;
+    }
+
+    public static boolean legalMove() {
+        if(game.tileSum > 6) {
+            int dieTotal = game.dice[0] + game.dice[1];
+            return game.roundScore == dieTotal || !game.rolled;
+        } else {
+            return game.roundScore == game.dice[0]
+                    || game.roundScore == game.dice[1];
+        }
     }
 
     /**
