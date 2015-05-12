@@ -10,7 +10,7 @@ Both parts were written in Java for Java 7.
 
 The server program must be run by typing this command line:
 
-java PubDiceServer <host> <port>
+java PubDiceServer host port
 
     <host> is the host name or IP address of the server.
     <port> is the port number of the server. 
@@ -19,7 +19,7 @@ java PubDiceServer <host> <port>
 
 The client program must be run by typing this command line:
 
-java PubDice <host> <port> <playername>
+java PubDice host port playername
 
     <host> is the host name or IP address of the server.
     <port> is the port number of the server.
