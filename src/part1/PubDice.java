@@ -2,7 +2,6 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.Observable;
 import java.io.*;
-import java.nio.charset.Charset;
 
 /**
  * The Shut the Box Model. Manages all the data and the server connection.
@@ -31,8 +30,8 @@ public class PubDice extends Observable {
 
     // Connection vars
     private Socket socket;          // Socket to the server
-	private DataInputStream in;		// Input stream from server
-	private DataOutputStream out;	// Output stream to server
+    BufferedReader in;              // Input buffer from server
+    BufferedWriter out;             // Output buffer to server
 
     /**
      * Makes an instance of PubDice.
@@ -92,19 +91,6 @@ public class PubDice extends Observable {
             return result;
         } else return "Waiting for partner";
     }
-
-	private static void sendMessage(String message) throws IOException {
-		int len = message.length();
-		byte[] mBytes = message.getBytes(Charset.forName("UTF-8"));
-
-		game.out.writeInt(len);
-		game.out.write(mBytes, 0, len);
-	}
-
-	private static void processServerMessage(byte[] message) {
-		String mtek = new String(message);
-		processServerMessage(mtek.split(" "));
-	}
 
     /**
      * Takes in the tokenized message from the server and updates the model.
@@ -183,7 +169,9 @@ public class PubDice extends Observable {
         game.roundScore += (game.tiles[i] ? 1 : -1) * i;
 
         try {
-            sendMessage("tile " + i + " " + up);
+            game.out.write("tile " + i + " " + up);
+            game.out.newLine();
+            game.out.flush();
         } catch(IOException ex) {
             System.err.println(ex.toString());
             System.exit(1);
@@ -209,7 +197,9 @@ public class PubDice extends Observable {
         game.rolled = true;
 
         try {
-            sendMessage("roll");
+            game.out.write("roll");
+            game.out.newLine();
+            game.out.flush();
         } catch(IOException ex) {
             System.err.println(ex.toString());
             System.exit(1);
@@ -225,7 +215,9 @@ public class PubDice extends Observable {
 
         try {
             resetBoard();
-            sendMessage("done");
+            game.out.write("done");
+            game.out.newLine();
+            game.out.flush();
         } catch (IOException ex) {
             System.err.println(ex.toString());
             System.exit(1);
@@ -285,7 +277,9 @@ public class PubDice extends Observable {
      */
     public static void quit() {
         try {
-            sendMessage("quit");
+            game.out.write("quit");
+            game.out.newLine();
+            game.out.flush();
         } catch (IOException ex) {
             System.err.println(ex.toString());
             System.exit(1);
@@ -317,8 +311,8 @@ public class PubDice extends Observable {
 
         try {
             game.socket = new Socket(host, port);
-            game.in = new DataInputStream(game.socket.getInputStream());
-            game.out = new DataOutputStream(game.socket.getOutputStream());
+            game.in = new BufferedReader(new InputStreamReader(game.socket.getInputStream()));
+            game.out = new BufferedWriter(new OutputStreamWriter(game.socket.getOutputStream()));
 
         } catch (IOException e) {
             System.err.println("Unable to connect to host " + args[0] + " on port "
@@ -329,18 +323,17 @@ public class PubDice extends Observable {
         game.addObserver(new PubDiceController());
 
         try {
-            sendMessage("join " + game.playerName);
-			
-            while (true) {		
-                int len = game.in.readInt();
-				while(len <= 0) {
-					len = game.in.readInt();
-				}
-				
-				byte[] data = new byte[len];
-                game.in.readFully(data);
+            game.out.write("join " + game.playerName);
+            game.out.newLine();
+            game.out.flush();
 
-                processServerMessage(data);
+            while (true) {
+                while(!game.in.ready());
+                String s = game.in.readLine();
+
+                // Spin off the processing into a new thread.
+                final String[] mtokens = s.split(" ");
+                processServerMessage(mtokens);
             }
         } catch (IOException ex) {
             System.err.println(ex.toString());
