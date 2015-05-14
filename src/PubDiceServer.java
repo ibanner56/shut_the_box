@@ -3,6 +3,10 @@ import java.io.*;
 
 public class PubDiceServer {
 
+	/**
+	 * Opens a socket on the passed host and post, then waits for clients to
+	 * connect, and spins them off in new ClientThreads as they arrive.
+	 */
 	public static void main(String args[]) {
 		if(args.length != 2) {
 			System.err.println("Usage: java PubDiceServer <hostname> <port>");
